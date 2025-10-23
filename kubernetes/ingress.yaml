@@ -3,16 +3,22 @@ kind: Ingress
 metadata:
   name: ecommerce-ingress
   annotations:
-    # These annotations configure HOW the ALB behaves
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
 spec:
-  # This is the crucial line that was missing from your live configuration.
-  # It explicitly tells the 'alb' controller to manage this Ingress.
   ingressClassName: alb
   rules:
   - http:
       paths:
+      # ADD THIS NEW RULE for /api/users
+      - path: /api/users
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service # Route to auth-service
+            port:
+              number: 5000     # On the auth-service port
+      # --- Existing rules below ---
       - path: /api/auth
         pathType: Prefix
         backend:
