@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      containers:
+      - name: product-service
+        image: 597727831065.dkr.ecr.ap-south-1.amazonaws.com/product-service:latest
+        ports:
+        - containerPort: 5001
+        env:
+        - name: PORT
+          value: "5001"
+        - name: MONGO_URI
+          value: "mongodb+srv://app-user-dev:sanjay99@arjuncluster.9ohjyam.mongodb.net/ecommerce_db?retryWrites=true&w=majority"
+        - name: JWT_SECRET
+          value: "MySuperSecretKey123!@#"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-service
+spec:
+  selector:
+    app: product-service
+  ports:
+  - protocol: TCP
+    port: 5001
+    targetPort: 5001

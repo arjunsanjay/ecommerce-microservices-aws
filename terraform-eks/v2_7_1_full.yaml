@@ -1,0 +1,504 @@
+# This file is a combination of the following manifests:
+# - https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/v2.7.1/docs/install/iam_policy.json
+# - https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/v2.7.1/docs/install/crds.yaml
+# - https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/v2.7.1/docs/install/controller.yaml
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/name: aws-load-balancer-controller
+  name: aws-load-balancer-controller
+  namespace: kube-system
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: ingressclassparams.elbv2.k8s.aws
+spec:
+  group: elbv2.k8s.aws
+  names:
+    kind: IngressClassParams
+    listKind: IngressClassParamsList
+    plural: ingressclassparams
+    singular: ingressclassparams
+  scope: Cluster
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: IngressClassParams is the Schema for the IngressClassParams
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: IngressClassParamsSpec defines the desired state of IngressClassParams
+            properties:
+              group:
+                description: Group is the group name of the IngressClass
+                type: string
+              ipAddressType:
+                description: IPAddressType is the IP address type of Ingress Controller.
+                enum:
+                - ipv4
+                - dualstack
+                type: string
+              loadBalancerAttributes:
+                description: A list of load balancer attributes to apply to the given
+                  load balancer.
+                items:
+                  description: LoadBalancerAttribute defines a single load balancer
+                    attribute.
+                  properties:
+                    key:
+                      type: string
+                    value:
+                      type: string
+                  required:
+                  - key
+                  - value
+                  type: object
+                type: array
+              namespace:
+                description: Namespace is the namespace of the IngressClass
+                type: string
+              scheme:
+                description: Scheme is the scheme of the Ingress Controller.
+                enum:
+                - internal
+                - internet-facing
+                type: string
+              sslPolicy:
+                description: SSLPolicy is the SSL policy for configuring TLS listeners.
+                type: string
+              tags:
+                description: A list of tags to apply to the given load balancer.
+                items:
+                  description: Tag defines a single AWS tag.
+                  properties:
+                    key:
+                      type: string
+                    value:
+                      type: string
+                  required:
+                  - key
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: targetgroupbindings.elbv2.k8s.aws
+spec:
+  group: elbv2.k8s.aws
+  names:
+    kind: TargetGroupBinding
+    listKind: TargetGroupBindingList
+    plural: targetgroupbindings
+    singular: targetgroupbinding
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: TargetGroupBinding is the Schema for the TargetGroupBinding
+          API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TargetGroupBindingSpec defines the desired state of TargetGroupBinding
+            properties:
+              ipAddressType:
+                description: IPAddressType defines IP address type of target group
+                enum:
+                - ipv4
+                - ipv6
+                type: string
+              networking:
+                description: networking provides the networking setup for LoadBalancer
+                  Controller.
+                properties:
+                  ingress:
+                    description: Ingress controllers will discover TargetGroupBinding
+                      via this annotation on Ingress resource.
+                    items:
+                      description: IngressSelector selects Ingresses for targetGroupBinding.
+                      properties:
+                        groupName:
+                          description: groupName is the group name for an ingress
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              nodeSelector:
+                description: node selector for instance type targets
+                properties:
+                  matchExpressions:
+                    description: A list of node selector requirements. The requirements
+                      are ANDed.
+                    items:
+                      description: A node selector requirement is a selector that
+                        contains values, a key, and an operator that relates the key
+                        and values.
+                      properties:
+                        key:
+                          description: The node selector key.
+                          type: string
+                        operator:
+                          description: Represents a key's relationship to a set of
+                            values. Valid operators are In, NotIn, Exists, DoesNotExist.
+                            Gt, and Lt.
+                          type: string
+                        values:
+                          description: An array of string values. If the operator
+                            is In or NotIn, the values array must be non-empty. If
+                            the operator is Exists or DoesNotExist, the values array
+                            must be empty. If the operator is Gt or Lt, the values
+                            array must have a single element, which will be interpreted
+                            as an integer. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: A node selector term, matching nodes against a map
+                      of key-value pairs.
+                    type: object
+                type: object
+              serviceRef:
+                description: serviceRef is a reference to a Kubernetes Service and
+                  ServicePort.
+                properties:
+                  name:
+                    description: Name is the name of the Service.
+                    type: string
+                  port:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: Port is the port of the ServicePort.
+                    x-kubernetes-int-or-string: true
+                required:
+                - name
+                - port
+                type: object
+              targetGroupARN:
+                description: targetGroupARN is the Amazon Resource Name (ARN) of the
+                  target group.
+                type: string
+              targetType:
+                description: targetType is the TargetType of TargetGroup. If unspecified,
+                  it will be automatically inferred.
+                enum:
+                - instance
+                - ip
+                type: string
+              vpcID:
+                description: vpcID is the VPC of the TargetGroup. If unspecified,
+                  it will be automatically inferred.
+                type: string
+            required:
+            - serviceRef
+            - targetGroupARN
+            type: object
+          status:
+            description: TargetGroupBindingStatus defines the observed state of TargetGroupBinding
+            properties:
+              observedGeneration:
+                description: The generation observed by the TargetGroupBinding controller.
+                format: int64
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: aws-load-balancer-controller
+  name: aws-load-balancer-controller
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/status
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - update
+- apiGroups:
+  - elbv2.k8s.aws
+  resources:
+  - ingressclassparams
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - elbv2.k8s.aws
+  resources:
+  - targetgroupbindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - elbv2.k8s.aws
+  resources:
+  - targetgroupbindings/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/name: aws-load-balancer-controller
+  name: aws-load-balancer-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aws-load-balancer-controller
+subjects:
+- kind: ServiceAccount
+  name: aws-load-balancer-controller
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/name: aws-load-balancer-controller
+  name: aws-load-balancer-controller
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/name: aws-load-balancer-controller
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+      labels:
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/name: aws-load-balancer-controller
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
+      containers:
+      - args:
+        - --cluster-name=ecommerce-cluster
+        - --aws-vpc-id=
+        - --aws-region=ap-south-1
+        - --enable-shield=false
+        - --enable-waf=false
+        - --enable-wafv2=false
+        - --enable-debug-logs=false
+        env:
+        - name: AWS_LBC_IMG
+          value: public.ecr.aws/eks/aws-load-balancer-controller:v2.7.1
+        image: public.ecr.aws/eks/aws-load-balancer-controller:v2.7.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: /healthz
+            port: 61779
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: controller
+        ports:
+        - containerPort: 9443
+          name: webhook-server
+          protocol: TCP
+        - containerPort: 8080
+          name: metrics-server
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readyz
+            port: 61779
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: "1"
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: cert
+          readOnly: true
+      priorityClassName: system-cluster-critical
+      securityContext:
+        fsGroup: 1337
+      serviceAccountName: aws-load-balancer-controller
+      terminationGracePeriodSeconds: 10
+      volumes:
+      - name: cert
+        secret:
+          defaultMode: 420
+          secretName: aws-load-balancer-tls

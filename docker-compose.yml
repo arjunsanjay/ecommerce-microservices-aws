@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # The Authentication Service
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./auth-service/.env
+
+  # The Product Catalog Service
+  product-service:
+    build: ./product-service
+    ports:
+      - "5001:5001"
+    env_file:
+      - ./product-service/.env
+
+  # The Order Service
+  order-service:
+    build: ./order-service
+    ports:
+      - "5002:5002"
+    env_file:
+      - ./order-service/.env
+
+  # The React Frontend Client
+  client-gateway:
+    build: ./client-gateway
+    ports:
+      # We map port 80 inside the container (Nginx's default)
+      # to port 3000 on our local machine.
+      - "3000:80"

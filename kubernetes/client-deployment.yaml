@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client-gateway
+  template:
+    metadata:
+      labels:
+        app: client-gateway
+    spec:
+      containers:
+      - name: client-gateway
+        image: 597727831065.dkr.ecr.ap-south-1.amazonaws.com/client-gateway:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-gateway-service
+spec:
+  selector:
+    app: client-gateway
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
