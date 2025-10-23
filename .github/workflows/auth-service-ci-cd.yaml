@@ -64,4 +64,4 @@ jobs:
         
         # Update the Kubernetes deployment to use the new image
         # Note: We use the image URI output from the previous step
-        kubectl set image deployment/${{ env.K8S_DEPLOYMENT_NAME }} ${{ env.K8S_DEPLOYMENT_NAME }}=${{ steps.build-image.outputs.image }}
+        kubectl set image deployment/${{ env.K8S_DEPLOYMENT_NAME }} auth-service=${{ steps.build-image.outputs.image }}
