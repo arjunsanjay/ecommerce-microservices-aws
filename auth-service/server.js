@@ -48,6 +48,7 @@ app.use('/api/users', userRoutes);
 
 // 6. Basic Routes (Placeholder)
 app.get('/', (req, res) => {
+    // Adding a comment here to test CI/CD
     res.send('Auth Service API is running...');
 });
 
