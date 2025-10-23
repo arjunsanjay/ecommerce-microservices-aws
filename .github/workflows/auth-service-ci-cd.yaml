@@ -1,0 +1,67 @@
+# Name of the workflow (shows up in the GitHub Actions tab)
+name: Deploy Auth Service
+
+# Controls when the workflow runs
+on:
+  push:
+    branches: [ main ] # Run only when code is pushed to the 'main' branch
+    paths:
+      - 'auth-service/**' # Only run if changes occur within the auth-service folder
+  workflow_dispatch: # Allows you to manually trigger the workflow from the Actions tab
+
+# Environment variables available to all jobs
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY: auth-service
+  EKS_CLUSTER_NAME: ecommerce-cluster
+  K8S_DEPLOYMENT_NAME: auth-deployment
+
+# Defines the jobs to be executed
+jobs:
+  build-and-deploy:
+    name: Build Image and Deploy to EKS
+    runs-on: ubuntu-latest # Use a standard Linux runner provided by GitHub
+
+    steps:
+    # 1. Checkout Code: Get the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v4 # Use a pre-built GitHub Action for checking out code
+
+    # 2. Configure AWS Credentials: Log in to AWS securely
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }} # Use the secret we stored
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # Use the secret we stored
+        aws-region: ${{ env.AWS_REGION }}
+
+    # 3. Login to Amazon ECR: Authenticate Docker with ECR
+    - name: Login to Amazon ECR
+      id: login-ecr # Give this step an ID so we can reference its output
+      uses: aws-actions/amazon-ecr-login@v2
+
+    # 4. Build, Tag, and Push Docker image: Build the image and push it to ECR
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        # Use the ECR registry URI output from the login step, plus the repository name
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        # Use the GitHub commit SHA as a unique image tag (good practice!)
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        # Build the docker image locally
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./auth-service
+        # Push the image to ECR
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        # Output the image URI for the next step
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    # 5. Download Kubeconfig & Deploy to EKS: Get cluster access and update deployment
+    - name: Download Kubeconfig and Deploy to EKS
+      run: |
+        # Get the kubeconfig file for cluster access
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+        
+        # Update the Kubernetes deployment to use the new image
+        # Note: We use the image URI output from the previous step
+        kubectl set image deployment/${{ env.K8S_DEPLOYMENT_NAME }} ${{ env.K8S_DEPLOYMENT_NAME }}=${{ steps.build-image.outputs.image }}
