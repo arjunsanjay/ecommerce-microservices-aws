@@ -1,4 +1,3 @@
-// src/components/login.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
@@ -108,21 +107,11 @@ const Login = () => {
                                 ? 'bg-red-50 border border-red-300'
                                 : 'bg-blue-50 border border-blue-300'
                         }`}>
-                            {messageType === 'success' && (
-                                <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />
-                            )}
-                            {messageType === 'error' && (
-                                <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
-                            )}
-                            {messageType === 'loading' && (
-                                <Loader size={20} className="text-blue-600 flex-shrink-0 mt-0.5 animate-spin" />
-                            )}
+                            {messageType === 'success' && <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-0.5" />}
+                            {messageType === 'error' && <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />}
+                            {messageType === 'loading' && <Loader size={20} className="text-blue-600 flex-shrink-0 mt-0.5 animate-spin" />}
                             <p className={`text-sm ${
-                                messageType === 'success' 
-                                    ? 'text-green-700' 
-                                    : messageType === 'error'
-                                    ? 'text-red-700'
-                                    : 'text-blue-700'
+                                messageType === 'success' ? 'text-green-700' : messageType === 'error' ? 'text-red-700' : 'text-blue-700'
                             }`}>
                                 {message}
                             </p>
@@ -133,137 +122,58 @@ const Login = () => {
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Email Field */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-900 mb-2">
-                                Email Address
-                            </label>
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Email Address</label>
                             <div className="relative">
                                 <Mail className="absolute left-4 top-3.5 text-gray-400" size={20} />
                                 <input
-                                    name="email"
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
+                                    name="email" type="email" value={formData.email} onChange={handleChange}
                                     placeholder="you@example.com"
                                     className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:outline-none transition-all ${
-                                        errors.email
-                                            ? 'border-red-500 focus:ring-red-500'
-                                            : 'border-gray-300 focus:ring-blue-500 focus:border-transparent'
+                                        errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-transparent'
                                     }`}
                                 />
                             </div>
-                            {errors.email && (
-                                <p className="text-red-600 text-sm mt-1 flex items-center space-x-1">
-                                    <AlertCircle size={16} />
-                                    <span>{errors.email}</span>
-                                </p>
-                            )}
+                            {errors.email && <p className="text-red-600 text-sm mt-1 flex items-center space-x-1"><AlertCircle size={16} /><span>{errors.email}</span></p>}
                         </div>
 
                         {/* Password Field */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-900 mb-2">
-                                Password
-                            </label>
+                            <label className="block text-sm font-semibold text-gray-900 mb-2">Password</label>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-3.5 text-gray-400" size={20} />
                                 <input
-                                    name="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={formData.password}
-                                    onChange={handleChange}
+                                    name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleChange}
                                     placeholder="••••••••"
                                     className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:outline-none transition-all ${
-                                        errors.password
-                                            ? 'border-red-500 focus:ring-red-500'
-                                            : 'border-gray-300 focus:ring-blue-500 focus:border-transparent'
+                                        errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-transparent'
                                     }`}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
-                                >
+                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 transition-colors">
                                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                                 </button>
                             </div>
-                            {errors.password && (
-                                <p className="text-red-600 text-sm mt-1 flex items-center space-x-1">
-                                    <AlertCircle size={16} />
-                                    <span>{errors.password}</span>
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Remember Me & Forgot Password */}
-                        <div className="flex items-center justify-between text-sm">
-                            <label className="flex items-center space-x-2 text-gray-700 cursor-pointer hover:text-gray-900">
-                                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 cursor-pointer" />
-                                <span>Remember me</span>
-                            </label>
-                            <a href="#" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
-                                Forgot password?
-                            </a>
+                            {errors.password && <p className="text-red-600 text-sm mt-1 flex items-center space-x-1"><AlertCircle size={16} /><span>{errors.password}</span></p>}
                         </div>
 
                         {/* Submit Button */}
                         <button
-                            type="submit"
-                            disabled={loading}
+                            type="submit" disabled={loading}
                             className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-lg hover:shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? (
-                                <>
-                                    <Loader size={20} className="animate-spin" />
-                                    <span>Signing in...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <span>Sign In</span>
-                                    <ArrowRight size={20} />
-                                </>
-                            )}
+                            {loading ? (<><Loader size={20} className="animate-spin" /><span>Signing in...</span></>) : (<><span>Sign In</span><ArrowRight size={20} /></>)}
                         </button>
                     </form>
 
-                    {/* Divider */}
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white text-gray-600">Or continue with</span>
-                        </div>
-                    </div>
-
-                    {/* Social Login - Placeholder */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <button
-                            type="button"
-                            className="py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700"
-                        >
-                            Google
-                        </button>
-                        <button
-                            type="button"
-                            className="py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700"
-                        >
-                            GitHub
-                        </button>
-                    </div>
-
                     {/* Sign Up Link */}
-                    <p className="text-center text-gray-700">
+                    <p className="text-center text-gray-700 pt-4">
                         Don't have an account?{' '}
-                        <Link
-                            to="/register"
-                            className="text-blue-600 hover:text-blue-700 font-bold transition-colors"
-                        >
+                        <Link to="/register" className="text-blue-600 hover:text-blue-700 font-bold transition-colors">
                             Sign Up
                         </Link>
                     </p>
 
                     {/* Test Credentials - Optional */}
-                    <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <p className="text-xs font-semibold text-gray-600 mb-2">Demo Credentials:</p>
                         <div className="space-y-1 text-xs text-gray-600">
                             <p><span className="font-mono bg-white px-2 py-1 rounded">admin@example.com</span> / <span className="font-mono bg-white px-2 py-1 rounded">password123</span></p>
@@ -275,13 +185,8 @@ const Login = () => {
                 {/* Footer Link */}
                 <p className="text-center text-sm text-gray-600 mt-8">
                     By signing in, you agree to our{' '}
-                    <a href="#" className="text-blue-600 hover:underline">
-                        Terms of Service
-                    </a>{' '}
-                    and{' '}
-                    <a href="#" className="text-blue-600 hover:underline">
-                        Privacy Policy
-                    </a>
+                    <a href="#" className="text-blue-600 hover:underline">Terms of Service</a>{' '}and{' '}
+                    <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
                 </p>
             </div>
         </div>
